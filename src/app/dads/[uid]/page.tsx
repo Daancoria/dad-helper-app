@@ -15,13 +15,17 @@ type DadProfile = {
 }
 
 type PageProps = {
-  params: { uid: string }
+  params: { uid: string } | Promise<{ uid: string }>
   searchParams?: Record<string, string | string[] | undefined>
 }
 
 const fallbackAvatar = '/default-avatar.svg'
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: { uid: string }
+}): Promise<Metadata> {
   try {
     const ref = doc(db, 'dads', params.uid)
     const snap = await getDoc(ref)
@@ -59,9 +63,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default async function DadPublicPage({ params }: PageProps) {
+export default async function DadPublicPage(props: PageProps) {
   try {
-    const ref = doc(db, 'dads', params.uid)
+    // Handle both direct object and Promise cases
+    const params = props.params instanceof Promise ? await props.params : props.params
+    const { uid } = params
+    
+    const ref = doc(db, 'dads', uid)
     const snap = await getDoc(ref)
 
     if (!snap.exists()) return notFound()
@@ -90,7 +98,7 @@ export default async function DadPublicPage({ params }: PageProps) {
         </div>
 
         <Suspense fallback={<div>Loading booking form...</div>}>
-          <BookingForm dadUid={params.uid} dadEmail={dad.email} />
+          <BookingForm dadUid={uid} dadEmail={dad.email} />
         </Suspense>
       </main>
     )

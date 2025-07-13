@@ -9,6 +9,7 @@ module.exports = {
     "plugin:import/errors",
     "plugin:import/warnings",
     "plugin:import/typescript",
+    "next", "next/core-web-vitals",
     "google",
     "plugin:@typescript-eslint/recommended",
   ],
