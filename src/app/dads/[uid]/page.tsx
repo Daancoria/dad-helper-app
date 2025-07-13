@@ -19,16 +19,15 @@ const fallbackAvatar = '/default-avatar.svg'
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ uid: string }>
+  params: { uid: string }
 }): Promise<Metadata> {
   try {
-    const { uid } = await params
-    const ref = doc(db, 'dads', uid)
+    const ref = doc(db, 'dads', params.uid)
     const snap = await getDoc(ref)
 
     if (!snap.exists()) return {}
-
     const dad = snap.data() as DadProfile
+
     if (dad.status !== 'approved') return {}
 
     return {
@@ -59,15 +58,18 @@ export async function generateMetadata({
   }
 }
 
-export default async function DadPublicPage({ params }: { params: { uid: string } }) {
+export default async function DadPublicPage({
+  params,
+}: {
+  params: { uid: string }
+}) {
   try {
-    const { uid } = params;
-    const ref = doc(db, 'dads', uid);
-    const snap = await getDoc(ref);
-    if (!snap.exists() || snap.data().status !== 'approved') {
-      return notFound();
-    }
+    const ref = doc(db, 'dads', params.uid)
+    const snap = await getDoc(ref)
+
+    if (!snap.exists()) return notFound()
     const dad = snap.data() as DadProfile
+
     if (dad.status !== 'approved') return notFound()
 
     return (
@@ -91,7 +93,7 @@ export default async function DadPublicPage({ params }: { params: { uid: string 
         </div>
 
         <Suspense fallback={<div>Loading booking form...</div>}>
-          <BookingForm dadUid={uid} dadEmail={dad.email} />
+          <BookingForm dadUid={params.uid} dadEmail={dad.email} />
         </Suspense>
       </main>
     )
