@@ -16,6 +16,7 @@ type DadProfile = {
 
 const fallbackAvatar = '/default-avatar.svg'
 
+// ✅ Fixed: `params` is NOT a Promise
 export async function generateMetadata({
   params,
 }: {
@@ -102,4 +103,3 @@ export default async function DadPublicPage({
     return notFound()
   }
 }
-
