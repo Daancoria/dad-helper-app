@@ -14,11 +14,6 @@ type DadProfile = {
   status: 'pending' | 'approved' | 'rejected'
 }
 
-type PageProps = {
-  params: { uid: string } | Promise<{ uid: string }>
-  searchParams?: Record<string, string | string[] | undefined>
-}
-
 const fallbackAvatar = '/default-avatar.svg'
 
 export async function generateMetadata({
@@ -63,13 +58,14 @@ export async function generateMetadata({
   }
 }
 
-export default async function DadPublicPage(props: PageProps) {
+// Let Next.js infer the props type automatically
+export default async function DadPublicPage({
+  params,
+}: {
+  params: { uid: string }
+}) {
   try {
-    // Handle both direct object and Promise cases
-    const params = props.params instanceof Promise ? await props.params : props.params
-    const { uid } = params
-    
-    const ref = doc(db, 'dads', uid)
+    const ref = doc(db, 'dads', params.uid)
     const snap = await getDoc(ref)
 
     if (!snap.exists()) return notFound()
@@ -98,7 +94,7 @@ export default async function DadPublicPage(props: PageProps) {
         </div>
 
         <Suspense fallback={<div>Loading booking form...</div>}>
-          <BookingForm dadUid={uid} dadEmail={dad.email} />
+          <BookingForm dadUid={params.uid} dadEmail={dad.email} />
         </Suspense>
       </main>
     )
